@@ -104,6 +104,33 @@ class RuleInfos(BaseHandler):
         return success(Rule.batch_load(where, dstart, dend))
 
 
+class RuleMigrate(BaseHandler):
+
+    check_fields = [
+        validator.Field("rule_id", validator.T_INT, True),
+        validator.Field("target_gid", validator.T_INT, True),
+    ]
+
+    @check('login')
+    def POST(self):
+        data = self.clean_data()
+        r = Rule.load(data['rule_id'])
+        rg = RuleGroup.load(data['target_gid'])
+        if not r or not rg:
+            raise ParamError(self.lang_resp.PARAM_ERROR)
+
+        if rg.status != RuleGroup.status_valid:
+            log.info("target_groupid=%s|status is discard", rg.id)
+            raise ParamError(self.lang_resp.PARAM_ERROR)
+
+        r.groupid = data['target_gid']
+        ok, resp = r.save()
+        if ok:
+            return success(r.gen_resp())
+        else:
+            raise ServerError(getattr(self.lang_resp, resp))
+
+
 class RuleGroupCreate(BaseHandler):
 
     check_fields = [

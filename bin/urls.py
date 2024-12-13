@@ -12,6 +12,7 @@ urls = (
     ('^/risk_portal/v1/rule/(?P<rule_id>\d+)$', rule.RuleInfo),
     ('^/risk_portal/v1/rule/edit$', rule.RuleEdit),
     ('^/risk_portal/v1/rules$', rule.RuleInfos),
+    ('^/risk_portal/v1/rule/migrate$', rule.RuleMigrate),
 
     # 规则组
     ('^/risk_portal/v1/rule_group/create$', rule.RuleGroupCreate),
