@@ -3,6 +3,7 @@ import traceback
 from qfcommon3.server.client import ThriftClient
 from thriftclient3.apollo import ApolloServer
 from thriftclient3.apollo.ttypes import ApolloException
+from thriftclient3.spring import Spring
 from conf import config
 log = logging.getLogger()
 
@@ -22,3 +23,7 @@ def apo_pass_check(username, password):
     except:
         log.warn(traceback.format_exc())
         return None
+
+
+def create_id():
+    return ThriftClient(config.SPRING_FRAMED, Spring, framed=True, raise_except=True).getid()

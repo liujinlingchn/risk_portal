@@ -47,7 +47,8 @@ def login(func):
         # 加载部分信息到handler 实例
         # self.role = self.user.ses['role']
         # self.org_uid = self.user.ses['org_uid']
-        self.sessionid = sessionid
+        # self.sessionid = sessionid
+        self.userid = int(self.user.ses['userid'])
 
         ret = func(self, *args, **kw)
 

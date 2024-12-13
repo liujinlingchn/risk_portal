@@ -53,3 +53,4 @@ REDIS_CONF = {
 }
 APOLLO_SERVERS = [{'addr': ('apollo', 6700), 'timeout': 10000}]
 SESSION_SERVERS = [{'addr': ('session', 4700), 'timeout': 2000}]
+SPRING_FRAMED = [{'addr': ('spring-framed', 7120), 'timeout': 2000}]

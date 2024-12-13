@@ -51,6 +51,7 @@ class BaseHandler(Handler):
         v = validator.Validator(self.check_fields)
         err = v.verify(data)
         if err:
+            log.debug("check params error(%s)", err)
             raise ParamError(self.lang_resp.PARAM_ERROR)
         return v.data
 
