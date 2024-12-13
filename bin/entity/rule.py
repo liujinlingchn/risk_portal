@@ -81,12 +81,18 @@ class Rule(object):
         other = "order by ctime desc"
         if end:
             other = "order by ctime desc limit %d,%d" % (start, end)
+
+        cnt = 0
+        with dbpool.get_connection_exception('qf_risk_3') as conn:
+            record = conn.select_one('rules', fields="count(*) as total", where=where)
+            cnt = record['total']
+
         with dbpool.get_connection_exception('qf_risk_3') as conn:
             records = conn.select('rules', where=where, other=other)
             if records:
-                return [Rule._build_by_record(record).gen_resp() for record in records]
+                return cnt, [Rule._build_by_record(record).gen_resp() for record in records]
             else:
-                return []
+                return cnt, []
 
     @classmethod
     def load(cls, rule_id):
@@ -221,3 +227,11 @@ class RuleGroup(object):
             return self._create()
         else:
             return self._update()
+
+    def gen_resp(self):
+        resp = self.__dict__.copy()
+        resp['id'] = str(resp['id'])
+        for k in ('utime', 'excute_type', 'checksum'):
+            resp.pop(k)
+        resp['status_desc'] = self.status_map[resp['status']]
+        return resp

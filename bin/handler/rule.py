@@ -101,7 +101,8 @@ class RuleInfos(BaseHandler):
         data.pop('ectime', None)
         dstart, dend = self.page_slicing(data)
         where.update(data)
-        return success(Rule.batch_load(where, dstart, dend))
+        cnt, value = Rule.batch_load(where, dstart, dend)
+        return success({'total': cnt, 'rules': value})
 
 
 class RuleMigrate(BaseHandler):
@@ -153,3 +154,13 @@ class RuleGroupCreate(BaseHandler):
             return success({})
         else:
             raise ServerError(getattr(self.lang_resp, resp))
+
+
+class RuleGroupInfo(BaseHandler):
+
+    @check('login')
+    def GET(self, gid):
+        rg = RuleGroup.load(gid)
+        if not rg:
+            raise ParamError(self.lang_resp.PARAM_ERROR)
+        return success(rg.gen_resp())
