@@ -6,3 +6,4 @@ class RESPMSG(object):
     CREATE_ERROR = "Create Error"
     EDIT_ERROR = "Edit Error"
     DUPLICATE_DATA = "Duplicate Data"
+    UNKOWN_ERROR = "Unknown Error"

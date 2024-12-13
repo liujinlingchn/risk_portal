@@ -40,6 +40,7 @@ class Rule(object):
         self.description = description
         self.salience = salience
         self.status = status
+        # when then str
         self.rule_when = rule_when
         self.rule_then = rule_then
         self.groupid = groupid
@@ -63,6 +64,29 @@ class Rule(object):
         rule.ctime = record['ctime']
         rule.utime = record['utime']
         return rule
+
+    def gen_resp(self):
+        resp = self.__dict__.copy()
+        resp['id'] = str(resp['id'])
+        for k in ('utime', ):
+            resp.pop(k)
+        resp['status_desc'] = self.status_map[resp['status']]
+        rg = RuleGroup.load(resp['groupid'])
+        resp['groupid'] = str(resp['groupid'])
+        resp['groupid_name'] = rg.name
+        return resp
+
+    @staticmethod
+    def batch_load(where, start, end):
+        other = "order by ctime desc"
+        if end:
+            other = "order by ctime desc limit %d,%d" % (start, end)
+        with dbpool.get_connection_exception('qf_risk_3') as conn:
+            records = conn.select('rules', where=where, other=other)
+            if records:
+                return [Rule._build_by_record(record).gen_resp() for record in records]
+            else:
+                return []
 
     @classmethod
     def load(cls, rule_id):

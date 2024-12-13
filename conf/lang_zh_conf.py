@@ -6,3 +6,4 @@ class RESPMSG(object):
     CREATE_ERROR = "新建失败"
     EDIT_ERROR = "修改失败"
     DUPLICATE_DATA = "重复的数据"
+    UNKOWN_ERROR = "未知错误"

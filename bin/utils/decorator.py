@@ -101,8 +101,8 @@ def check(funcs=None):
                 errcode, errinfo = e.errcode, e.errmsg
             except:
                 log.warn(traceback.format_exc())
-                errinfo = getattr(self, '_base_err', 'param error')
-                errcode = QFRET.PARAMERR
+                errinfo = getattr(self, '_base_err', self.lang_resp.UNKOWN_ERROR)
+                errcode = QFRET.UNKOWNERR
 
             return error(errcode, errinfo, errinfo)
 

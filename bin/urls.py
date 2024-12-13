@@ -9,6 +9,9 @@ urls = (
 
     # 规则
     ('^/risk_portal/v1/rule/create$', rule.RuleCreate),
+    ('^/risk_portal/v1/rule/(?P<rule_id>\d+)$', rule.RuleInfo),
+    ('^/risk_portal/v1/rule/edit$', rule.RuleEdit),
+    ('^/risk_portal/v1/rules$', rule.RuleInfos),
 
     # 规则组
     ('^/risk_portal/v1/rule_group/create$', rule.RuleGroupCreate),

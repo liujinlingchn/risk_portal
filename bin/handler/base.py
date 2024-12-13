@@ -1,4 +1,5 @@
 import logging
+import datetime
 
 from bin import globalization
 
@@ -54,6 +55,26 @@ class BaseHandler(Handler):
             log.debug("check params error(%s)", err)
             raise ParamError(self.lang_resp.PARAM_ERROR)
         return v.data
+
+    def check_ctime(self, data):
+        if 'sctime' in data and 'ectime' in data:
+            try:
+                sctime = datetime.datetime.strptime(data['sctime'], "%Y-%m-%d %H:%M:%S")
+                ectime = datetime.datetime.strptime(data['ectime'], "%Y-%m-%d %H:%M:%S")
+                assert sctime < ectime
+                return True
+            except:
+                raise ParamError(self.lang_resp.PARAM_ERROR)
+        return False
+
+    def page_slicing(self, data):
+        try:
+            page = int(data.pop('page'))
+            page_size = int(data.pop('page_size'))
+            assert page > 0 and page_size > 0
+            return (page - 1) * page_size, page * page_size
+        except:
+            raise ParamError(self.lang_resp.PARAM_ERROR)
 
     def is_valid_sessionid(self, sessionid):
         '''判断sessionid在应用有效
