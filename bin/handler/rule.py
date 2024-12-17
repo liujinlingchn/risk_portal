@@ -135,7 +135,7 @@ class RuleMigrate(BaseHandler):
 class RuleGroupCreate(BaseHandler):
 
     check_fields = [
-        validator.Field("name", validator.T_STR, True, match=r'^\w{1,48}$'),
+        validator.Field("name", validator.T_STR, True, match=r'^\S{1,48}$'),
         validator.Field("description", validator.T_STR, True, match=r'^[\s\S]{0,48}$'),
         validator.Field("salience", validator.T_INT, True),
         validator.Field("status", validator.T_INT, True),
@@ -164,3 +164,86 @@ class RuleGroupInfo(BaseHandler):
         if not rg:
             raise ParamError(self.lang_resp.PARAM_ERROR)
         return success(rg.gen_resp())
+
+
+class RuleGroupEdit(BaseHandler):
+
+    check_fields = [
+        validator.Field("id", validator.T_INT, True),
+        validator.Field("name", validator.T_STR, True, match=r'^\S{1,48}$'),
+        validator.Field("description", validator.T_STR, True, match=r'^[\s\S]{0,48}$'),
+        validator.Field("salience", validator.T_INT, True),
+        validator.Field("status", validator.T_INT, True),
+    ]
+
+    @check('login')
+    def POST(self):
+        self._base_err = self.lang_resp.EDIT_ERROR
+        data = self.clean_data()
+        rg = RuleGroup.load(data['id'])
+        if not rg:
+            raise ParamError(self.lang_resp.PARAM_ERROR)
+
+        data['op_userid'] = self.userid
+        rg.__dict__.update(data)
+        ok, resp = rg.save()
+        if ok:
+            return success(rg.gen_resp())
+        else:
+            raise ServerError(getattr(self.lang_resp, resp))
+
+
+class RuleGroupInfos(BaseHandler):
+
+    check_fields = [
+        validator.Field("id", validator.T_INT),
+        validator.Field("name", validator.T_STR, False, match=r'^\S{1,48}$'),
+        validator.Field("salience", validator.T_INT),
+        validator.Field("sctime", validator.T_DATETIME),
+        validator.Field("ectime", validator.T_DATETIME),
+        validator.Field("page", validator.T_INT, True),
+        validator.Field("page_size", validator.T_INT, True),
+    ]
+
+    @check('login')
+    def GET(self):
+        data = self.clean_data()
+        where = {}
+        if self.check_ctime(data):
+            where['ctime'] = ('between', (data['sctime'], data['ectime']))
+        data.pop('sctime', None)
+        data.pop('ectime', None)
+        dstart, dend = self.page_slicing(data)
+        where.update(data)
+        cnt, value = RuleGroup.batch_load(where, dstart, dend)
+        return success({'total': cnt, 'rule_groups': value})
+
+
+class RuleGroupRules(BaseHandler):
+
+    check_fields = [
+        validator.Field("gid", validator.T_INT),
+        validator.Field("rule_id", validator.T_INT),
+        validator.Field("rule_name", validator.T_STR, False, match=r'^\S{1,48}$'),
+        validator.Field("page", validator.T_INT, True),
+        validator.Field("page_size", validator.T_INT, True),
+    ]
+
+    @check('login')
+    def GET(self):
+        data = self.clean_data()
+        rg = RuleGroup.load(data['gid'])
+        if not rg:
+            raise ParamError(self.lang_resp.PARAM_ERROR)
+
+        where = {
+            'groupid': data['gid']
+        }
+        if 'rule_id' in data:
+            where['id'] = data['rule_id']
+        if 'rule_name' in data:
+            where['name'] = ('like', "%{}%".format(data['rule_name']))
+
+        dstart, dend = self.page_slicing(data)
+        cnt, value = Rule.batch_load(where, dstart, dend)
+        return success({'total': cnt, 'rules': value})

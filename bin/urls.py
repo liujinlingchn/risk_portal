@@ -17,6 +17,7 @@ urls = (
     # 规则组
     ('^/risk_portal/v1/rule_group/create$', rule.RuleGroupCreate),
     ('^/risk_portal/v1/rule_group/(?P<gid>\d+)$', rule.RuleGroupInfo),
-    ('^/risk_portal/v1/rule_group/edit$', rule.RuleGroupCreate),
-    ('^/risk_portal/v1/rule_groups$', rule.RuleGroupCreate),
+    ('^/risk_portal/v1/rule_group/edit$', rule.RuleGroupEdit),
+    ('^/risk_portal/v1/rule_groups$', rule.RuleGroupInfos),
+    ('^/risk_portal/v1/rule_group/rules$', rule.RuleGroupRules),
 )

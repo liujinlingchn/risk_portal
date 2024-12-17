@@ -176,6 +176,7 @@ class RuleGroup(object):
         grule.ctime = record['ctime']
         grule.utime = record['utime']
         grule.checksum = record['checksum']
+        grule.excute_type = record['excute_type']
         return grule
 
     @classmethod
@@ -235,3 +236,21 @@ class RuleGroup(object):
             resp.pop(k)
         resp['status_desc'] = self.status_map[resp['status']]
         return resp
+
+    @staticmethod
+    def batch_load(where, start, end):
+        other = "order by ctime desc"
+        if end:
+            other = "order by ctime desc limit %d,%d" % (start, end)
+
+        cnt = 0
+        with dbpool.get_connection_exception('qf_risk_3') as conn:
+            record = conn.select_one('rule_group', fields="count(*) as total", where=where)
+            cnt = record['total']
+
+        with dbpool.get_connection_exception('qf_risk_3') as conn:
+            records = conn.select('rule_group', where=where, other=other)
+            if records:
+                return cnt, [RuleGroup._build_by_record(record).gen_resp() for record in records]
+            else:
+                return cnt, []
